@@ -175,14 +175,33 @@ allow_mtd_write() {
 	grep -v 'linux,ubi' "${WORKDIR}/fdt-1.dts.patched" > "${WORKDIR}/fdt-1.dts.patched2"
 	mv "${WORKDIR}/fdt-1.dts.patched2" "${WORKDIR}/fdt-1.dts.patched"
 	sed -i 's/"spi-nand"/"u-boot-dont-touch-spi-nand"/' "${WORKDIR}/fdt-1.dts.patched"
-	sed -i 's/"UBI_DEV"/"NEW_UBI_DEV"/' "${WORKDIR}/fdt-1.dts.patched"
+	sed -i 's/"ubi"/"NEW_UBI"/' "${WORKDIR}/fdt-1.dts.patched"
 	sed -i 's/partitions {/mtdparts: partitions {/' "${WORKDIR}/fdt-1.dts.patched"
 	cat >>"${WORKDIR}/fdt-1.dts.patched" <<EOF
 
 &mtdparts {
-	partition@400000 {
-		reg = <0x400000 0x7c00000>;
-		label = "OLD_UBI_DEV";
+	partition@0 {
+		reg = <0x0 0x100000>;
+		label = "STOCK-BL2";
+		read-only;
+	};
+
+	partition@180000 {
+		reg = <0x180000 0x400000>;
+		label = "STOCK-Factory";
+		read-only;
+	};
+
+	partition@580000 {
+		reg = <0x580000 0x200000>;
+		label = "STOCK-FIP";
+		read-only;
+	};
+
+	partition@780000 {
+		reg = <0x780000 0x80000>;
+		label = "STOCK-ORGDATA";
+		read-only;
 	};
 };
 EOF
@@ -254,11 +273,11 @@ bundle_initrd() {
 	esac
 }
 
-asus_bt8_installer() {
+buffalo_wxr18000be10p_installer() {
 	OPENWRT_TARGET="https://downloads.openwrt.org/snapshots/targets/mediatek/filogic"
 	OPENWRT_IB="openwrt-imagebuilder-mediatek-filogic.Linux-x86_64.tar.zst"
-	OPENWRT_INITRD="openwrt-mediatek-filogic-asus_zenwifi-bt8-ubootmod-initramfs-recovery.itb"
-	OPENWRT_SYSUPGRADE="openwrt-mediatek-filogic-asus_zenwifi-bt8-ubootmod-squashfs-sysupgrade.itb"
+	OPENWRT_INITRD="openwrt-mediatek-filogic-buffalo_wxr18000be10p-ubootmod-initramfs-recovery.itb"
+	OPENWRT_SYSUPGRADE="openwrt-mediatek-filogic-buffalo_wxr18000be10p-ubootmod-squashfs-sysupgrade.itb"
 	OPENWRT_ADD_REC_PACKAGES=(uhttpd luci-mod-admin-full luci-theme-bootstrap)
 	OPENWRT_REMOVE_PACKAGES=(kmod-mt7996-firmware kmod-mt7996e kmod-mt76-connac kmod-mt76-core kmod-mt7996-firmware mt7988-wo-firmware odhcp6c odhcpd-ipv6only ppp ppp-mod-pppoe wpad-basic-mbedtls)
 	OPENWRT_ADD_PACKAGES=()
@@ -278,12 +297,12 @@ asus_bt8_installer() {
 	cp "${INSTALLERDIR}/dl/${OPENWRT_SYSUPGRADE}" "${DESTDIR}"
 
 	bundle_initrd installer "${INSTALLERDIR}/dl/${OPENWRT_INITRD}" \
-		"${OPENWRT_DIR}/staging_dir/target-aarch64_cortex-a53_musl/image/mt7988-spim-nand-ubi-ddr4-bl2.img" \
-		"${OPENWRT_DIR}/staging_dir/target-aarch64_cortex-a53_musl/image/mt7988_asus_zenwifi-bt8-u-boot.fip" \
+		"${OPENWRT_DIR}/staging_dir/target-aarch64_cortex-a53_musl/image/mt7988-spim-nand-ubi-comb-bl2.img" \
+		"${OPENWRT_DIR}/staging_dir/target-aarch64_cortex-a53_musl/image/mt7988_buffalo_wxr18000be10p-u-boot.fip" \
 		"${DESTDIR}/${FILEBASE}.itb"
 
 	${MKIMAGE} -A arm64 -O linux -T kernel -C lzma -a 0x48080000 -e 0x48080000 -d "${WORKDIR}/${FILEBASE}-installer"* "${DESTDIR}/${FILEBASE}-installer.trx"
 	rm -r "${WORKDIR}"
 }
 
-asus_bt8_installer
+buffalo_wxr18000be10p_installer
