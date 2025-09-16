@@ -1,6 +1,6 @@
-## An OpenWrt UBI Installer Image Generator for ASUS ZenWiFi BT8
+## An OpenWrt UBI Installer Image Generator for Buffalo WXR18000BE10P
 
-**WARNING #1** This will replace the bootloader (TF-A 2.12, U-Boot 2025.01) and convert the flash layout of the device to an all-in-UBI layout. The installer stores a copy of the previous bootchain in a dedicated UBI volume `boot_backup`.
+**WARNING #1** This will replace the bootloader (TF-A 2.9, vendor U-Boot ver.1.02) and convert the flash layout of the device to an all-in-UBI layout. The installer stores a copy of the previous bootchain in a dedicated UBI volume `boot_backup`.
 
 **WARNING #2** Re-flashing the installer when the device is already using UBI flash layout will erase the previously backed up bootchain, which in most cases would be the vendor/official one.
 
@@ -37,10 +37,10 @@ You'll need the below to use the script to generate the installer image:
 
 4. Open browser and visit http://192.168.1.1/
 
-5. Upload `openwrt-mediatek-filogic-asus_zenwifi-bt8-ubootmod-initramfs-recovery-installer.trx`
+5. Upload `openwrt-mediatek-filogic-buffalo_wxr18000be10p-ubootmod-initramfs-recovery-installer.trx`
 
 6. Once OpenWrt initramfs system comes up, do sysupgrade using
-   `openwrt-mediatek-filogic-asus_zenwifi-bt8-ubootmod-squashfs-sysupgrade.bin`
+   `openwrt-mediatek-filogic-buffalo_wxr18000be10p-ubootmod-squashfs-sysupgrade.bin`
 
 ## Backup stock/vendor bootchain
 
