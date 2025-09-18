@@ -256,11 +256,10 @@ install_write_backup
 if [ "$HAS_AQUANTIA" = "1" ] && [ -s "$AQUANTIA" ]; then
 	echo "write Aquantia firmware"
 	ubi_mknod ubi0_6
-	mkdir -p /tmp/firmware
-	mount -t ubifs /dev/ubi0_6 /tmp/firmware
-	mkdir /tmp/marvell
-	cp "$AQUANTIA" /tmp/firmware/marvell/CUX3410.cld
-	umount /tmp/firmware
+	mount -t ubifs /dev/ubi0_6 /mnt
+	mkdir /mnt/marvell
+	cp "$AQUANTIA" /mnt/marvell/CUX3410.cld
+	umount /mnt
 fi
 
 led_off "$LED_WIRELESS_AMBER"
