@@ -37,19 +37,19 @@ prepare_openwrt_ib() {
 	cd "${INSTALLERDIR}/dl"
 	gpg --no-default-keyring --keyring "${INSTALLERDIR}/openwrt-keyring" --list-key $OPENWRT_PGP 1>/dev/null 2>/dev/null || gpg --no-default-keyring --keyring "${INSTALLERDIR}/openwrt-keyring" --keyserver ${KEYSERVER}	--recv-key $OPENWRT_PGP
 	gpg --no-default-keyring --keyring "${INSTALLERDIR}/openwrt-keyring" --list-key $OPENWRT_PGP 1>/dev/null 2>/dev/null || exit 0
-	rm -f "sha256sums.asc" "sha256sums"
-	wget "${OPENWRT_TARGET}/sha256sums.asc"
-	wget "${OPENWRT_TARGET}/sha256sums"
-	gpg --no-default-keyring --keyring "${INSTALLERDIR}/openwrt-keyring" --verify sha256sums.asc sha256sums || exit 1
+#	rm -f "sha256sums.asc" "sha256sums"
+#	wget "${OPENWRT_TARGET}/sha256sums.asc"
+#	wget "${OPENWRT_TARGET}/sha256sums"
+#	gpg --no-default-keyring --keyring "${INSTALLERDIR}/openwrt-keyring" --verify sha256sums.asc sha256sums || exit 1
 
 	trap - EXIT
 	rm -rf -- "${GNUPGHOME}"
 	export -n GNUPGHOME
 
 	sha256sum -c sha256sums --ignore-missing || rm -f "$OPENWRT_SYSUPGRADE" "$OPENWRT_IB" "$OPENWRT_INITRD"
-	wget -c "${OPENWRT_TARGET}/${OPENWRT_INITRD}"
-	wget -c "${OPENWRT_TARGET}/${OPENWRT_SYSUPGRADE}"
-	wget -c "${OPENWRT_TARGET}/${OPENWRT_IB}"
+#	wget -c "${OPENWRT_TARGET}/${OPENWRT_INITRD}"
+#	wget -c "${OPENWRT_TARGET}/${OPENWRT_SYSUPGRADE}"
+#	wget -c "${OPENWRT_TARGET}/${OPENWRT_IB}"
 	sha256sum -c sha256sums --ignore-missing || exit 1
 	mkdir -p "${OPENWRT_DIR}" || exit 1
 	tar -xf "${INSTALLERDIR}/dl/${OPENWRT_IB}" -C "${OPENWRT_DIR}" --strip-components=1
@@ -227,15 +227,25 @@ bundle_initrd() {
 	[[ ${#OPENWRT_REMOVE_PACKAGES[@]} -gt 0 ]] && IPKG_NO_SCRIPT=1 IPKG_INSTROOT="${WORKDIR}/initrd" \
 		"${APK}" --no-scripts --no-logfile --root "${WORKDIR}/initrd" del "${OPENWRT_REMOVE_PACKAGES[@]}"
 
+	# use local repo
+	#sed -i 's_https://downloads.openwrt.org/snapshots_http://localhost:9788_' "${WORKDIR}/initrd/etc/apk/repositories.d/distfeeds.list"
+	
+	# remove kmod / empty repo
+	#sed -i '/aarch64_cortex-a53\/packages/d' "${WORKDIR}/initrd/etc/apk/repositories.d/distfeeds.list"
+	#sed -i '/luci/d' "${WORKDIR}/initrd/etc/apk/repositories.d/distfeeds.list"
+	sed -i '/kmods/d' "${WORKDIR}/initrd/etc/apk/repositories.d/distfeeds.list"
+	#sed -i '/telephony/d' "${WORKDIR}/initrd/etc/apk/repositories.d/distfeeds.list"
+	#sed -i '/video/d' "${WORKDIR}/initrd/etc/apk/repositories.d/distfeeds.list"
+	
 	PATH="$(dirname "${APK}"):$PATH" \
 	TMPDIR="${WORKDIR}/initrd/tmp" \
-		"${APK}" --no-logfile --root "${WORKDIR}/initrd" update
+		"${APK}" --no-logfile --root "${WORKDIR}/initrd" update --allow-untrusted
 
 	[[ ${#OPENWRT_ADD_PACKAGES[@]} -gt 0 ]] && \
 		PATH="$(dirname "${APK}"):$PATH" \
 		TMPDIR="${WORKDIR}/initrd/tmp" \
 		IPKG_NO_SCRIPT=1 IPKG_INSTROOT="${WORKDIR}/initrd" \
-		"${APK}" --no-scripts --no-logfile --root "${WORKDIR}/initrd" add "${OPENWRT_ADD_PACKAGES[@]}"
+		"${APK}" --no-scripts --no-logfile --root "${WORKDIR}/initrd" add "${OPENWRT_ADD_PACKAGES[@]}" --allow-untrusted
 
 	case "$imgtype" in
 		recovery)
@@ -243,7 +253,7 @@ bundle_initrd() {
 			PATH="$(dirname "${APK}"):$PATH" \
 			TMPDIR="${WORKDIR}/initrd/tmp" \
 			IPKG_NO_SCRIPT=1 IPKG_INSTROOT="${WORKDIR}/initrd" \
-				"${APK}" --no-scripts --no-logfile --root "${WORKDIR}/initrd" add "${OPENWRT_ADD_REC_PACKAGES[@]}"
+				"${APK}" --no-scripts --no-logfile --root "${WORKDIR}/initrd" add "${OPENWRT_ADD_REC_PACKAGES[@]}" --allow-untrusted
 			;;
 		installer)
 			cp -avr "${INSTALLERDIR}/files/"* "${WORKDIR}/initrd"
@@ -275,7 +285,7 @@ bundle_initrd() {
 
 buffalo_wxr18000be10p_installer() {
 	OPENWRT_TARGET="https://downloads.openwrt.org/snapshots/targets/mediatek/filogic"
-	OPENWRT_IB="openwrt-imagebuilder-mediatek-filogic.Linux-x86_64.tar.zst"
+	OPENWRT_IB="openwrt-imagebuilder-mediatek-filogic.Linux-aarch64.tar.zst"
 	OPENWRT_INITRD="openwrt-mediatek-filogic-buffalo_wxr18000be10p-ubootmod-initramfs-recovery.itb"
 	OPENWRT_SYSUPGRADE="openwrt-mediatek-filogic-buffalo_wxr18000be10p-ubootmod-squashfs-sysupgrade.itb"
 	OPENWRT_ADD_REC_PACKAGES=(uhttpd luci-mod-admin-full luci-theme-bootstrap)
