@@ -159,7 +159,7 @@ led_heartbeat_inv "$LED_POWER_WHITE"
 
 echo "Phase 1: Prepare"
 
-led_heartbeat "$LED_INTERNET_AMBER"
+led_heartbeat "$LED_ROUTER_AMBER"
 echo "Phase 1.1: Prepare stock bootchain"
 install_prepare_mtd_backup "BL2" "FIP"
 
@@ -168,7 +168,7 @@ install_prepare_mtd_backup "BL2" "FIP"
 # Thing may be shifted due to MTK NMBM being used previously, we simply
 # error out if we cannot find the data at the expected offset
 
-led_flash "$LED_INTERNET_AMBER"
+led_flash "$LED_ROUTER_AMBER"
 echo "Phase 1.2: Prepare Factory data"
 if [ -s "$FACTORY" ]; then
 	echo "using provided Factory file"
@@ -207,7 +207,7 @@ else
 fi
 cp /tmp/factory /tmp/Factory
 
-led_heartbeat_inv "$LED_INTERNET_AMBER"
+led_heartbeat_inv "$LED_ROUTER_AMBER"
 echo "Phase 1.3: Prepare device data"
 if [ "$HAS_ORGDATA" = "1" ]; then
 	echo "backing up ORGDATA"
