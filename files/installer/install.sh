@@ -201,7 +201,7 @@ else
 	# Wi-Fi EEPROMs is at the start, Wired MAC at 0x0ffff4
 	# [0x100000 - 0x400000) are ff-filled
 	# Only first 0x100000 bytes are needed
-	dd if=/dev/full of=/tmp/factory bs=1048576 count=1
+	dd if=/dev/zero bs=1048576 count=1 | tr '\0' '\377' | dd of=/tmp/factory
 	dd if=/tmp/eeproms of=/tmp/factory conv=notrunc
 	dd if=/tmp/macblock of=/tmp/factory bs=131072 seek=7 count=1
 fi
