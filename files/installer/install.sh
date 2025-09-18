@@ -173,8 +173,8 @@ echo "Phase 1.2: Prepare Factory data"
 if [ -s "$FACTORY" ]; then
 	echo "using provided Factory file"
 	[ "$(hexdump -v -s 0x0 -n 2 -e '"%02x"' "$FACTORY")" = "7990" ] || trigger_crash "Invalid Factory file"
-	local readm_eeprom=$(hexdump -s 0x4 -v -n 6 -e '6/1 "%02x"' "$FACTORY")
-	local readm=$(hexdump -s 0x0ffff4 -v -n 6 -e '6/1 "%02x"' "$FACTORY")
+	readm_eeprom=$(hexdump -s 0x4 -v -n 6 -e '6/1 "%02x"' "$FACTORY")
+	readm=$(hexdump -s 0x0ffff4 -v -n 6 -e '6/1 "%02x"' "$FACTORY")
 	if [ "${readm_eeprom:0:6}" != "${readm:0:6}" ]; then
 		echo "MAC address prefix mismatch, EEPROM: $readm_eeprom, Factory: $readm"
 		trigger_crash "invalid Factory file"
@@ -183,13 +183,13 @@ if [ -s "$FACTORY" ]; then
 else
 	echo "extracting Factory data from flash"
 
-	local mtdnum=$(find_mtd_index "STOCK-Factory")
-	local magic=$(hexdump -v -s 0 -n 2 -e '"%02x"' /dev/mtd$mtdnum)
+	mtdnum=$(find_mtd_index "STOCK-Factory")
+	magic=$(hexdump -v -s 0 -n 2 -e '"%02x"' /dev/mtd$mtdnum)
 	[ "$magic" = "7990" ] || trigger_crash "EEPROM not found on expected offset"
 	dd if=/dev/mtd$mtdnum bs=131072 count=1 of=/tmp/eeproms
 
-	local readm_eeprom=$(hexdump -s 0x4 -v -n 6 -e '6/1 "%02x"' /dev/mtd$mtdnum)
-	local readm=$(hexdump -s 0xffff4 -v -n 6 -e '6/1 "%02x"' /dev/mtd$mtdnum)
+	readm_eeprom=$(hexdump -s 0x4 -v -n 6 -e '6/1 "%02x"' /dev/mtd$mtdnum)
+	readm=$(hexdump -s 0xffff4 -v -n 6 -e '6/1 "%02x"' /dev/mtd$mtdnum)
 	if [ "${readm_eeprom:0:6}" != "${readm:0:6}" ]; then
 		echo "MAC address mismatch, EEPROM: $readm_eeprom, Factory: $readm"
 		trigger_crash "cannot find MAC address data"
@@ -211,8 +211,8 @@ led_heartbeat_inv "$LED_INTERNET_AMBER"
 echo "Phase 1.3: Prepare device data"
 if [ "$HAS_ORGDATA" = "1" ]; then
 	echo "backing up ORGDATA"
-	local mtdnum=$(find_mtd_index "STOCK-ORGDATA")
-	local magic=$(hexdump -v -s 0x0 -n 13 -e '13/1 "%02x"' /dev/mtd$mtdnum)
+	mtdnum=$(find_mtd_index "STOCK-ORGDATA")
+	magic=$(hexdump -v -s 0x0 -n 13 -e '13/1 "%02x"' /dev/mtd$mtdnum)
 	[ "$magic" = "57585231383030304245313050" ] || trigger_crash "ORGDATA magic not found"
 	# Only 64k are used, rest is ff-filled. Backup an 128k block anyway
 	dd if=/dev/mtd$mtdnum of=/tmp/backup/ORGDATA bs=131072 count=1
