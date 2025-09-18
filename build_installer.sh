@@ -180,25 +180,25 @@ allow_mtd_write() {
 	cat >>"${WORKDIR}/fdt-1.dts.patched" <<EOF
 
 &mtdparts {
-	partition@0 {
+	partition@0x0 {
 		reg = <0x0 0x100000>;
 		label = "STOCK-BL2";
 		read-only;
 	};
 
-	partition@180000 {
+	partition@0x180000 {
 		reg = <0x180000 0x400000>;
 		label = "STOCK-Factory";
 		read-only;
 	};
 
-	partition@580000 {
+	partition@0x580000 {
 		reg = <0x580000 0x200000>;
 		label = "STOCK-FIP";
 		read-only;
 	};
 
-	partition@780000 {
+	partition@0x780000 {
 		reg = <0x780000 0x80000>;
 		label = "STOCK-ORGDATA";
 		read-only;
@@ -267,7 +267,7 @@ bundle_initrd() {
 			allow_mtd_write
 			EXTERNAL=
 			STATIC=
-			sed -i 's/<0x46000000>/<0x48080000>/' "${ITSFILE}"
+			sed -i 's/<0x46000000>/<0x48000000>/' "${ITSFILE}"
 			refit_image 128k "$imgtype"
 			;;
 	esac
@@ -301,7 +301,7 @@ buffalo_wxr18000be10p_installer() {
 		"${OPENWRT_DIR}/staging_dir/target-aarch64_cortex-a53_musl/image/mt7988_buffalo_wxr18000be10p-u-boot.fip" \
 		"${DESTDIR}/${FILEBASE}.itb"
 
-	${MKIMAGE} -A arm64 -O linux -T kernel -C lzma -a 0x48080000 -e 0x48080000 -d "${WORKDIR}/${FILEBASE}-installer"* "${DESTDIR}/${FILEBASE}-installer.trx"
+	mv "${WORKDIR}/${FILEBASE}-installer"* "${DESTDIR}"
 	rm -r "${WORKDIR}"
 }
 
