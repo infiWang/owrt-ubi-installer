@@ -140,7 +140,7 @@ install_prepare_ubi() {
 	[ "$HAS_FIP" = "1" ] && ubimkvol /dev/ubi0 -n 0 -t static -s $(cat $FIP | wc -c) -N fip && ubi_mknod ubi0_0 && ubiupdatevol /dev/ubi0_0 "$FIP"
 	[ "$HAS_FACTORY" = "1" ] && ubimkvol /dev/ubi0 -n 1 -t static -s $(cat "/tmp/factory" | wc -c) -N factory && ubi_mknod ubi0_1 && ubiupdatevol /dev/ubi0_1 "/tmp/factory"
 	[ "$HAS_ENV" = "1" ] && ubimkvol /dev/ubi0 -n 2 -s 126976 -N ubootenv && ubimkvol /dev/ubi0 -n 3 -s 126976 -N ubootenv2
-	[ "$HAS_AQUANTIA" = "1" ] && ubimkvol /dev/ubi0 -n 6 -s 507904 -N firmware
+	[ "$HAS_AQUANTIA" = "1" ] && ubimkvol /dev/ubi0 -n 6 -s 3MiB -N firmware
 }
 
 echo "Phase 0: Checks"
