@@ -204,6 +204,12 @@ else
 	dd if=/dev/zero bs=1048576 count=1 | tr '\0' '\377' | dd of=/tmp/factory
 	dd if=/tmp/eeproms of=/tmp/factory conv=notrunc
 	dd if=/tmp/macblock of=/tmp/factory bs=131072 seek=7 count=1
+
+	cp /tmp/factory /tmp/factory_check
+	dd if=/dev/zero bs=1048576 count=3 | tr '\0' '\377' | dd of=/tmp/factory_check bs=1048576 seek=1 conv=notrunc
+	sha256sum_factory=$(hexdump -v -s 0x0 -n 32 -e '32/1 "%02x"' /tmp/factory_check)
+	sha256sum_stock=$(hexdump -v -s 0x0 -n 32 -e '32/1 "%02x"' /dev/mtd$mtdnum)
+	[ "$sha256sum_factory" = "$sha256sum_stock" ] || trigger_crash "Factory data checksum mismatch"
 fi
 cp /tmp/factory /tmp/Factory
 
@@ -216,6 +222,12 @@ if [ "$HAS_ORGDATA" = "1" ]; then
 	[ "$magic" = "57585231383030304245313050" ] || trigger_crash "ORGDATA magic not found"
 	# Only 64k are used, rest is ff-filled. Backup an 128k block anyway
 	dd if=/dev/mtd$mtdnum of=/tmp/backup/ORGDATA bs=131072 count=1
+
+	cp /tmp/backup/ORGDATA /tmp/ORGDATA_check
+	dd if=/dev/zero bs=131072 count=3 | tr '\0' '\377' | dd of=/tmp/ORGDATA_check bs=131072 seek=1 conv=notrunc
+	sha256sum_orgdata=$(hexdump -v -s 0x0 -n 32 -e '32/1 "%02x"' /tmp/ORGDATA_check)
+	sha256sum_stock=$(hexdump -v -s 0x0 -n 32 -e '32/1 "%02x"' /dev/mtd$mtdnum)
+	[ "$sha256sum_orgdata" = "$sha256sum_stock" ] || trigger_crash "ORGDATA checksum mismatch"
 else
 	echo "skipping ORGDATA backup"
 fi
