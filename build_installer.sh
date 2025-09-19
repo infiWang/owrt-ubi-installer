@@ -205,6 +205,8 @@ allow_mtd_write() {
 	};
 };
 EOF
+	sed -i '/led-boot/d' "${WORKDIR}/fdt-1.dts.patched"
+	sed -i  '/led-running/d' "${WORKDIR}/fdt-1.dts.patched"
 	"$DTC" -I dts -O dtb -o "${WORKDIR}/fdt-1" "${WORKDIR}/fdt-1.dts.patched"
 }
 
@@ -256,6 +258,8 @@ bundle_initrd() {
 				"${APK}" --no-scripts --no-logfile --root "${WORKDIR}/initrd" add "${OPENWRT_ADD_REC_PACKAGES[@]}" --allow-untrusted
 			;;
 		installer)
+			sed -i 's/buffalo,wxr18000be10p/not_buffalo,wxr18000be10p/' "${WORKDIR}/initrd/etc/board.d/01_leds"
+
 			cp -avr "${INSTALLERDIR}/files/"* "${WORKDIR}/initrd"
 			cp -v "$@" "${WORKDIR}/initrd/installer"
 			;;
